@@ -78,16 +78,18 @@ function clean(value: string | undefined) {
   return v === "—" || v === "–" || v === "-" ? "" : v;
 }
 
-// Sections are stored in capitals so "bsit2-9" and "BSIT2-9" are the same.
-export function normalizeSection(section: string) {
-  return section.trim().toUpperCase();
+// Sections and subjects are stored in capitals with no spaces, so
+// "bsit 1-6" = "BSIT1-6" and "ITe 366" = "ITE366". These are exactly
+// the characters the database's clean_label() removes (009 SQL),
+// including the non-breaking space Google Sheets sometimes pastes.
+const SPACES = /[ \t\n\r\f\v ]/g;
+
+function cleanLabel(value: string) {
+  return value.replace(SPACES, "").toUpperCase();
 }
 
-// Subjects too, with all spaces removed: "ITe 366" -> "ITE366".
-// Must match the database's rule in 008-subjects.sql.
-export function normalizeSubject(subject: string) {
-  return subject.replace(/\s/g, "").toUpperCase();
-}
+export const normalizeSection = cleanLabel;
+export const normalizeSubject = cleanLabel;
 
 // One key per section + subject, e.g. "BSIT1-6|ITE260", for counting.
 export function groupKey(section: string, subject: string) {
@@ -97,6 +99,7 @@ export function groupKey(section: string, subject: string) {
 export function readUpload(
   text: string,
   section: string,
+  subject: string,
 ): {
   records: StudentRecord[];
   problems: string[];
@@ -124,10 +127,13 @@ export function readUpload(
     };
   }
 
-  // The Section column is optional (the teacher types the section). If
-  // the file has one, it must agree, to catch uploading the wrong file.
+  // Section and Subject columns are optional (the teacher types both).
+  // If the file has them, they must agree, to catch uploading the wrong
+  // file, e.g. the ITE366 CSV while ITE260 is typed.
   const sectionIndex = header.indexOf("section");
+  const subjectIndex = header.indexOf("subject");
   const typedSection = normalizeSection(section);
+  const typedSubject = normalizeSubject(subject);
 
   const records: StudentRecord[] = [];
   const seen = new Map<string, number>();
@@ -148,6 +154,12 @@ export function readUpload(
     if (fileSection && typedSection && normalizeSection(fileSection) !== typedSection) {
       problems.push(
         `Row ${line}: the file says section ${fileSection}, but you typed ${typedSection}.`,
+      );
+    }
+    const fileSubject = subjectIndex === -1 ? "" : clean(cells[subjectIndex]);
+    if (fileSubject && typedSubject && normalizeSubject(fileSubject) !== typedSubject) {
+      problems.push(
+        `Row ${line}: the file says subject ${fileSubject}, but you typed ${typedSubject}.`,
       );
     }
     if (record.student_number) {

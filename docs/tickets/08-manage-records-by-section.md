@@ -15,8 +15,8 @@ one is handled on its own.
       current records of that section will be replaced
 - [x] Saving replaces ONLY that section's records in one all-or-nothing
       step. Other sections are unchanged.
-- [x] A student number that already belongs to another section is
-      rejected with a clear message
+- [x] A student number that already belongs to another section (for
+      the same subject, since Ticket 09) is rejected with a clear message
 - [x] A Download CSV template button gives a CSV with the right headings
 - [x] The dashboard lists sections (sorted). Clicking one opens its
       records table, student count and last-upload time.

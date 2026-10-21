@@ -1,7 +1,8 @@
-# Spec: ITE300 Retake Checker
+# Spec: Retries Checker (ITE260, ITE300, ITE366)
 
 ## Problem
-When P2 results come out, ITE300 students don't know which wrap-up
+When P2 results come out, the teacher's ITE260, ITE300 and ITE366
+students don't know which wrap-up
 quizzes and check-in tests they need to retake, or what score they need.
 Each of about 200 students sends the teacher a private message to ask,
 which floods the teacher's inbox. The teacher can't share the Google
@@ -15,7 +16,9 @@ are told they're all clear. The teacher keeps working in Google Sheets
 and uploads the Upload tab as a CSV whenever the list changes.
 
 ## The user
-**Students** in the ITE300 sections (BSIT2-9 first). The teacher is the
+**Students** in the teacher's classes: BSIT1-20 · ITE260, BSIT1-6 ·
+ITE260, BSIT1-6 · ITE366, BSIT2-6 · ITE300 and BSIT2-9 · ITE300. A
+student can be in several of them. The teacher is the
 single **admin** who keeps the data current. The admin isn't a second
 type of user the MVP is built for. The admin side exists only to feed
 the student lookup.
@@ -56,19 +59,22 @@ the student lookup.
    everything below works per **section + subject** (e.g. BSIT1-6 ·
    ITE260): Add record asks for both, and each section + subject has
    its own row, Replace all records and Remove buttons.
-   - **Add record**: the teacher types the section and chooses that
-     section's CSV. The preview says, for example, "55 students found for
-     BSIT2-9, 0 problems. This will replace the 55 current BSIT2-9
-     records." Saving replaces only that section, in one go, and if the
-     file has a problem nothing changes.
+   - **Add record**: the teacher types the section and subject and
+     chooses their CSV. The preview says, for example, "55 students found
+     for BSIT2-9 · ITE300, 0 problems. This will replace the 55 current
+     BSIT2-9 · ITE300 records." Saving replaces only that section +
+     subject, in one go, and if the file has a problem nothing changes.
+     If the file has its own Section or Subject column, it must match
+     what was typed. Spaces are ignored: "bsit 1-6" means BSIT1-6.
    - **Download CSV template**: a CSV with the right headings.
-   - **A list of sections**, sorted. Each row shows the section name,
-     student count and last upload time. Clicking a section opens its
-     records table (codes included), its own **Replace all records**
-     button (the section is filled in and locked), and a **Remove
-     section** button that asks for confirmation first.
+   - **A list of sections and subjects**, sorted, e.g. "BSIT2-9 ·
+     ITE300". Each row shows the student count and last upload time.
+     Clicking it opens its records table (codes included), its own
+     **Replace all records** button (section and subject filled in and
+     locked), and a **Remove** button that asks for confirmation first.
    - **A note** explaining that to change a record, the teacher edits the
-     CSV and re-uploads it with that section's Replace all records.
+     CSV and re-uploads it with that section + subject's Replace all
+     records.
      Records are never edited on screen.
    - A **Log out** button.
 
@@ -81,8 +87,8 @@ like `6 / 7` and `Aim high` work.
 - `student_number`: unique per subject (one record per student per
   subject). Matched exactly, ignoring spaces at the start and end.
 - `student_name`
-- `section`: e.g. BSIT2-9, stored in capitals
-- `subject`: e.g. ITE260, stored in capitals (Ticket 09)
+- `section`: e.g. BSIT2-9, stored in capitals without spaces
+- `subject`: e.g. ITE260, stored in capitals without spaces (Ticket 09)
 - `code`: the secret code. One code per student, the same in every
   subject (checked on upload). Matched ignoring upper/lower case.
 - `wrapup_quizzes`: e.g. "M1, M3". Blank means none.
@@ -96,11 +102,13 @@ Who may read and write (Row Level Security ON):
 - **Students and the public may not read the table at all.**
 - Students look up a record only through one database **lookup
   function**. It takes a student number and a code and returns only that
-  student's name, section, retakes and min. scores. It never returns the
-  code or any other row. A wrong number or code returns nothing.
-- Replacing a section happens as a single all-or-nothing step: either
-  the whole new file goes in, or nothing changes. Other sections are
-  never touched, and a student number can belong to only one section.
+  student's records: one row per subject, with the subject, section,
+  name, retakes and min. scores. It never returns the code or anyone
+  else's rows. A wrong number or code returns nothing.
+- Replacing a section + subject happens as a single all-or-nothing step:
+  either the whole new file goes in, or nothing changes. Other sections
+  and subjects are never touched. Within one subject a student belongs to
+  one section, but different subjects can be in different sections.
 
 **Table `admins`** has one row containing the admin's account ID. RLS
 is ON. A signed-in user may only check whether their own ID is in it.
@@ -119,8 +127,10 @@ is created by hand in the Supabase dashboard.
 ## Done for the demo
 On the LIVE Vercel URL:
 - [ ] The admin logs in, and a wrong password is rejected.
-- [ ] The admin uploads the BSIT2-9 CSV, sees "55 students found", and
-      replaces all records.
+- [ ] The admin uploads the BSIT2-9 · ITE300 CSV, sees "55 students found
+      for BSIT2-9 · ITE300", and replaces its records.
+- [ ] A BSIT1-6 student enters ONE code, picks ITE260 and sees it, then
+      uses Check another subject to see ITE366.
 - [ ] A student with retakes enters their number and code and sees the
       correct wrap-ups, check-ins and min. scores.
 - [ ] A student with nothing to retake sees "You're all clear".

@@ -43,7 +43,7 @@ export function AddRecordCard({
   const { records, problems } =
     fileText === null
       ? { records: [] as StudentRecord[], problems: [] as string[] }
-      : readUpload(fileText, typedSection);
+      : readUpload(fileText, typedSection, typedSubject);
   const allProblems = [
     ...(fileText !== null && !typedSection ? ["Type the section first."] : []),
     ...(fileText !== null && !typedSubject ? ["Type the subject first."] : []),

@@ -5,7 +5,7 @@ export default function Home() {
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-8 px-4 py-12 sm:py-20">
       <header className="flex flex-col gap-2">
         <h1 className="text-3xl font-semibold tracking-tight">
-          Quizes and Check in Retries Checker
+          Quizzes and Check-in Retries Checker
         </h1>
         <p className="text-base text-muted-foreground">
           Enter your student number and the code your teacher gave you to see
