@@ -20,3 +20,7 @@ stays small enough to actually ship by Session 3.
 - Printing code slips from the app
 - Locking a student number after repeated wrong codes
 - Search on the admin records table
+
+## From ticket 08
+
+- The app generates codes for students who don't have one yet

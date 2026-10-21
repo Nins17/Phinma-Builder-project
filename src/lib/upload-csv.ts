@@ -1,10 +1,9 @@
-// Reads the Upload tab CSV (File -> Download -> CSV in Google Sheets)
-// and checks it before anything is saved.
+// Reads one section's Upload tab CSV (File -> Download -> CSV in Google
+// Sheets) and checks it before anything is saved.
 
 export type StudentRecord = {
   student_number: string;
   student_name: string;
-  section: string;
   code: string;
   wrapup_quizzes: string;
   wrapup_min_score: string;
@@ -12,22 +11,23 @@ export type StudentRecord = {
   checkin_min_score: string;
 };
 
-// Upload tab column name -> database column name.
+// Upload tab heading -> database column. These are also the headings in
+// the downloadable template, in this order.
 const COLUMNS: Record<string, keyof StudentRecord> = {
-  "student number": "student_number",
-  "student name": "student_name",
-  section: "section",
-  code: "code",
-  "wrap-up quizzes to retake": "wrapup_quizzes",
-  "min. score per quiz": "wrapup_min_score",
-  "check-in to retake": "checkin_tests",
-  "min. check-in score": "checkin_min_score",
+  "Student Number": "student_number",
+  "Student Name": "student_name",
+  Code: "code",
+  "Wrap-Up Quizzes to Retake": "wrapup_quizzes",
+  "Min. Score per Quiz": "wrapup_min_score",
+  "Check-in to Retake": "checkin_tests",
+  "Min. Check-in Score": "checkin_min_score",
 };
+
+export const TEMPLATE_HEADINGS = Object.keys(COLUMNS);
 
 const REQUIRED: (keyof StudentRecord)[] = [
   "student_number",
   "student_name",
-  "section",
   "code",
 ];
 
@@ -78,7 +78,15 @@ function clean(value: string | undefined) {
   return v === "—" || v === "–" || v === "-" ? "" : v;
 }
 
-export function readUpload(text: string): {
+// Sections are stored in capitals so "bsit2-9" and "BSIT2-9" are the same.
+export function normalizeSection(section: string) {
+  return section.trim().toUpperCase();
+}
+
+export function readUpload(
+  text: string,
+  section: string,
+): {
   records: StudentRecord[];
   problems: string[];
 } {
@@ -89,9 +97,10 @@ export function readUpload(text: string): {
   // Find each column by its heading, in whatever order they appear.
   const header = rows[0].map((h) => h.trim().toLowerCase());
   const index: Partial<Record<keyof StudentRecord, number>> = {};
-  header.forEach((h, i) => {
-    if (COLUMNS[h]) index[COLUMNS[h]] = i;
-  });
+  for (const [heading, key] of Object.entries(COLUMNS)) {
+    const i = header.indexOf(heading.toLowerCase());
+    if (i !== -1) index[key] = i;
+  }
   const missing = Object.entries(COLUMNS)
     .filter(([, key]) => index[key] === undefined)
     .map(([heading]) => heading);
@@ -99,17 +108,22 @@ export function readUpload(text: string): {
     return {
       records: [],
       problems: [
-        `Missing columns: ${missing.join(", ")}. Is this the Upload tab?`,
+        `Missing columns: ${missing.join(", ")}. Use the CSV template headings.`,
       ],
     };
   }
+
+  // The Section column is optional (the teacher types the section). If
+  // the file has one, it must agree, to catch uploading the wrong file.
+  const sectionIndex = header.indexOf("section");
+  const typedSection = normalizeSection(section);
 
   const records: StudentRecord[] = [];
   const seen = new Map<string, number>();
 
   rows.slice(1).forEach((cells, i) => {
     const line = i + 2; // spreadsheet row number (row 1 is the heading)
-    if (cells.every((c) => c.trim() === "")) return; // skip blank rows
+    if (cells.every((c) => clean(c) === "")) return; // skip blank or dash-only rows
 
     const record = {} as StudentRecord;
     for (const key of Object.values(COLUMNS)) {
@@ -118,6 +132,12 @@ export function readUpload(text: string): {
 
     for (const key of REQUIRED) {
       if (!record[key]) problems.push(`Row ${line}: missing ${key.replace("_", " ")}.`);
+    }
+    const fileSection = sectionIndex === -1 ? "" : clean(cells[sectionIndex]);
+    if (fileSection && typedSection && normalizeSection(fileSection) !== typedSection) {
+      problems.push(
+        `Row ${line}: the file says section ${fileSection}, but you typed ${typedSection}.`,
+      );
     }
     if (record.student_number) {
       const firstRow = seen.get(record.student_number);

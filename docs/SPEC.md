@@ -47,11 +47,17 @@ the student lookup.
    only "No match. Check your student number and code." It never says
    which one was wrong.
 3. **Admin login:** email and password. Only the admin's account works.
-4. **Admin dashboard:** Upload CSV with a preview ("55 students found, 0
-   problems") and a Replace all records button. Replacing happens in one
-   go, and if the file has a problem nothing changes. Below that, a table
-   of all records including codes, the time of the last upload, and a Log
-   out button.
+4. **Admin dashboard:** (updated by Ticket 08)
+   - **Add record**: the teacher types the section and chooses that
+     section's CSV. The preview says, for example, "55 students found for
+     BSIT2-9, 0 problems. This will replace the 55 current BSIT2-9
+     records." Saving replaces only that section, in one go, and if the
+     file has a problem nothing changes.
+   - **Download CSV template**: a CSV with the right headings.
+   - **One table per section**, sorted, each showing codes, the student
+     count, the last upload time, and a **Remove section** button that asks
+     for confirmation first.
+   - A **Log out** button.
 
 ## Data
 
@@ -77,8 +83,9 @@ Who may read and write (Row Level Security ON):
   function**. It takes a student number and a code and returns only that
   student's name, section, retakes and min. scores. It never returns the
   code or any other row. A wrong number or code returns nothing.
-- Replacing all records happens as a single all-or-nothing step: either
-  the whole new file goes in, or nothing changes.
+- Replacing a section happens as a single all-or-nothing step: either
+  the whole new file goes in, or nothing changes. Other sections are
+  never touched, and a student number can belong to only one section.
 
 **Table `admins`** has one row containing the admin's account ID. RLS
 is ON. A signed-in user may only check whether their own ID is in it.
