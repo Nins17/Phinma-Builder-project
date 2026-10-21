@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ITE300 Retake Checker",
+  title: "Retries Checker",
   description: "Check your P2 wrap-up quiz and check-in retakes",
 };
 
