@@ -8,7 +8,7 @@ one is handled on its own.
 
 **Blocked by:** 06
 
-**Status:** todo
+**Status:** done
 
 - [x] An Add record button asks for the section and a CSV file
 - [x] The preview shows the student count, any problems, and how many
@@ -31,4 +31,4 @@ one is handled on its own.
       database)
 - [x] Rows containing only dashes are ignored, not counted as students
 - [x] The student's Code box hides the code, with a Show/Hide button
-- [ ] Works on the live URL
+- [x] Works on the live URL
