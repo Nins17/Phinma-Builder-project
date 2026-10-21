@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "./logout-button";
+import { UploadCard } from "./upload-card";
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
@@ -36,7 +37,10 @@ export default async function AdminDashboard() {
       </header>
 
       {adminRow ? (
-        <RecordsCard />
+        <>
+          <UploadCard />
+          <RecordsCard />
+        </>
       ) : (
         <p className="text-sm text-destructive" role="alert">
           This account is not an admin.

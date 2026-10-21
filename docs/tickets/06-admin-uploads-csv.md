@@ -8,9 +8,9 @@ step.
 
 **Status:** todo
 
-- [ ] The dashboard has an Upload CSV picker that reads the Upload tab's
+- [x] The dashboard has an Upload CSV picker that reads the Upload tab's
       columns (student names containing commas work)
-- [ ] Before saving, a preview shows how many students were found and
+- [x] Before saving, a preview shows how many students were found and
       lists any problems (e.g. missing student number or code, or a
       duplicate student number)
 - [ ] The Replace all records button swaps old records for new ones as
