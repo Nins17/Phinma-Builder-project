@@ -6,7 +6,7 @@ can read the whole student records table without logging in.
 
 **Blocked by:** 01
 
-**Status:** todo
+**Status:** done
 
 - [x] The Supabase URL and publishable (anon) key are set in
       `.env.local` AND in Vercel's environment variables
@@ -21,5 +21,5 @@ can read the whole student records table without logging in.
 - [x] Two FAKE test students are added (one with retakes, one all
       clear). No real student data.
 - [x] The example `notes` table SQL is removed from the repo
-- [ ] Works on the live URL: the site shows a fake student's lookup
+- [x] Works on the live URL: the site shows a fake student's lookup
       result
