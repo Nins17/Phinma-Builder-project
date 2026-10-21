@@ -8,7 +8,7 @@ manages records per section + subject.
 
 **Blocked by:** 08
 
-**Status:** todo
+**Status:** done
 
 - [x] Every record has a subject. Existing BSIT2-9 records become ITE300.
 - [x] The same student number can have one record per subject
@@ -23,4 +23,4 @@ manages records per section + subject.
       their subjects. A student with one subject sees it straight away.
 - [x] The result shows the subject name, with Check another subject and
       Check another buttons
-- [ ] Works on the live URL
+- [x] Works on the live URL
