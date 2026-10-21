@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,7 @@ function toList(value: string) {
 export function RetakeChecker() {
   const [studentNumber, setStudentNumber] = useState("");
   const [code, setCode] = useState("");
+  const [showCode, setShowCode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [result, setResult] = useState<Retakes | null>(null);
@@ -61,6 +63,7 @@ export function RetakeChecker() {
     setResult(null);
     setStudentNumber("");
     setCode("");
+    setShowCode(false);
   }
 
   if (result) {
@@ -124,15 +127,34 @@ export function RetakeChecker() {
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="code">Code</Label>
-            <Input
-              id="code"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder="6-character code from your teacher"
-              autoComplete="off"
-              autoCapitalize="characters"
-              required
-            />
+            <div className="flex gap-2">
+              {/* type="password" shows dots, so classmates nearby can't
+                  read the code over the student's shoulder. */}
+              <Input
+                id="code"
+                type={showCode ? "text" : "password"}
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                placeholder="6-character code from your teacher"
+                autoComplete="off"
+                autoCapitalize="characters"
+                required
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowCode(!showCode)}
+                aria-pressed={showCode}
+                aria-controls="code"
+              >
+                {showCode ? (
+                  <EyeOff aria-hidden className="size-4" />
+                ) : (
+                  <Eye aria-hidden className="size-4" />
+                )}
+                {showCode ? "Hide" : "Show"}
+              </Button>
+            </div>
           </div>
           {message && (
             <p className="text-sm text-destructive" role="alert">
