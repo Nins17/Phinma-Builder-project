@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/server";
 
 // This is the starter screen. Once Ticket 01 is done and you can see this
 // page on your phone, delete everything here and build your own app.
@@ -32,7 +33,16 @@ const steps = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  // Ticket 02 connection check: look up the FAKE test student through the
+  // lookup function. Ticket 03 replaces this page with the real form.
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("lookup_student_record", {
+    p_student_number: "00-0000-000001",
+    p_code: "TEST01",
+  });
+  const testStudent = data?.[0];
+
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-4 py-12 sm:py-20">
       <header className="flex flex-col gap-3">
@@ -68,8 +78,25 @@ export default function Home() {
         </CardContent>
       </Card>
 
-      hello bsit 1-20
-      
+      <Card>
+        <CardHeader>
+          <CardTitle>Database check</CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm">
+          {error ? (
+            <p className="text-destructive">Not connected: {error.message}</p>
+          ) : testStudent ? (
+            <p>
+              ✅ Connected. Found fake student{" "}
+              <strong>{testStudent.student_name}</strong> ({testStudent.section}
+              ) — wrap-ups to retake: {testStudent.wrapup_quizzes}.
+            </p>
+          ) : (
+            <p>Connected, but the fake test student was not found.</p>
+          )}
+        </CardContent>
+      </Card>
+
 
       <div className="flex flex-wrap items-center gap-3">
         <Button>Replace this page with your app</Button>
