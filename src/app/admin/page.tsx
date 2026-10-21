@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 import { AddRecordCard } from "./add-record-card";
 import { LogoutButton } from "./logout-button";
@@ -112,9 +111,20 @@ export default async function AdminDashboard() {
         </p>
       )}
 
-      {sectionNames.map((name) => (
-        <SectionCard key={name} name={name} rows={sections.get(name)!} />
-      ))}
+      {sectionNames.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <h2 className="text-xl font-semibold tracking-tight">Sections</h2>
+          <p className="rounded-[var(--radius)] border border-border bg-secondary px-4 py-3 text-sm">
+            <strong>Need to change a record?</strong> Edit the CSV in Google
+            Sheets, then click <strong>Add record</strong>, type the same
+            section and upload it again. It replaces that section&apos;s
+            records.
+          </p>
+          {sectionNames.map((name) => (
+            <SectionCard key={name} name={name} rows={sections.get(name)!} />
+          ))}
+        </section>
+      )}
     </main>
   );
 }
@@ -125,25 +135,30 @@ function SectionCard({ name, rows }: { name: string; rows: Row[] }) {
     rows[0].uploaded_at,
   );
 
+  // <details> is the browser's built-in open/close box: clicking the
+  // <summary> line shows or hides the records. No extra code needed.
   return (
-    <Card>
-      <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <CardTitle>
-            {name} ({rows.length} students)
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Last uploaded:{" "}
-            {new Date(lastUpload).toLocaleString("en-PH", {
-              timeZone: "Asia/Manila",
-              dateStyle: "medium",
-              timeStyle: "short",
-            })}
-          </p>
-        </div>
-        <RemoveSectionButton section={name} count={rows.length} />
-      </CardHeader>
-      <CardContent>
+    <details className="group rounded-[var(--radius)] border border-border bg-card text-card-foreground shadow-sm">
+      <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-2 p-4 hover:bg-secondary">
+        <span className="flex items-center gap-2">
+          <span className="text-muted-foreground transition-transform group-open:rotate-90">
+            ▶
+          </span>
+          <span className="text-lg font-semibold">{name}</span>
+          <span className="text-sm text-muted-foreground">
+            {rows.length} students
+          </span>
+        </span>
+        <span className="text-sm text-muted-foreground">
+          Last uploaded:{" "}
+          {new Date(lastUpload).toLocaleString("en-PH", {
+            timeZone: "Asia/Manila",
+            dateStyle: "medium",
+            timeStyle: "short",
+          })}
+        </span>
+      </summary>
+      <div className="flex flex-col gap-4 border-t border-border p-4">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-border text-muted-foreground">
@@ -175,7 +190,10 @@ function SectionCard({ name, rows }: { name: string; rows: Row[] }) {
             </tbody>
           </table>
         </div>
-      </CardContent>
-    </Card>
+        <div>
+          <RemoveSectionButton section={name} count={rows.length} />
+        </div>
+      </div>
+    </details>
   );
 }
