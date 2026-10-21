@@ -83,7 +83,10 @@ export function AddRecordCard({
           className="w-fit"
           variant={fixedSection ? "outline" : "default"}
           size={fixedSection ? "sm" : "default"}
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setMessage(""); // don't show the last "Saved" inside a new upload
+            setOpen(true);
+          }}
         >
           {fixedSection ? "Replace all records" : "Add record"}
         </Button>

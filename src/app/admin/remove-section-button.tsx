@@ -22,7 +22,7 @@ export function RemoveSectionButton({
     if (!sure) return;
 
     setRemoving(true);
-    const { error } = await createClient().rpc("remove_section_records", {
+    const { data, error } = await createClient().rpc("remove_section_records", {
       p_section: section,
     });
     setRemoving(false);
@@ -31,6 +31,7 @@ export function RemoveSectionButton({
       window.alert(`Nothing was removed: ${error.message}`);
       return;
     }
+    window.alert(`Removed ${data} ${section} records.`);
     router.refresh(); // reload the section tables
   }
 

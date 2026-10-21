@@ -13,7 +13,9 @@ export function TemplateButton() {
     link.href = url;
     link.download = "retake-upload-template.csv";
     link.click();
-    URL.revokeObjectURL(url);
+    // Free the file a moment later; freeing it straight away can cancel
+    // the download in some browsers (older Safari).
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   return (

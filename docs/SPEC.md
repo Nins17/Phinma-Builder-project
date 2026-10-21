@@ -39,7 +39,8 @@ the student lookup.
 
 ## Screens
 1. **Check my retakes (home, students):** Student Number and Code boxes
-   and a Check button. No student list and no names on this page.
+   and a Check button. The code is hidden as dots while typing, with a
+   Show/Hide button. No student list and no names on this page.
 2. **My retakes (student result):** student name and section, Wrap-Up
    Quizzes to Retake with min. score, Check-ins to Retake with min.
    score, or "No retakes, you're all clear 🎉". Also shows "P2 status is
@@ -54,9 +55,14 @@ the student lookup.
      records." Saving replaces only that section, in one go, and if the
      file has a problem nothing changes.
    - **Download CSV template**: a CSV with the right headings.
-   - **One table per section**, sorted, each showing codes, the student
-     count, the last upload time, and a **Remove section** button that asks
-     for confirmation first.
+   - **A list of sections**, sorted. Each row shows the section name,
+     student count and last upload time. Clicking a section opens its
+     records table (codes included), its own **Replace all records**
+     button (the section is filled in and locked), and a **Remove
+     section** button that asks for confirmation first.
+   - **A note** explaining that to change a record, the teacher edits the
+     CSV and re-uploads it with that section's Replace all records.
+     Records are never edited on screen.
    - A **Log out** button.
 
 ## Data
