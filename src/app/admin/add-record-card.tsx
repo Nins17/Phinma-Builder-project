@@ -15,14 +15,18 @@ import {
 
 // sectionCounts: how many records each section has now, e.g.
 // { "BSIT2-9": 55 }, so the preview can say what will be replaced.
+// fixedSection: set inside a section's table to make this its "Replace
+// all records" button, with the section filled in and locked.
 export function AddRecordCard({
   sectionCounts,
+  fixedSection,
 }: {
   sectionCounts: Record<string, number>;
+  fixedSection?: string;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [section, setSection] = useState("");
+  const [section, setSection] = useState(fixedSection ?? "");
   const [fileText, setFileText] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -66,7 +70,7 @@ export function AddRecordCard({
       return;
     }
     setMessage(`✅ Saved ${data} students in ${typedSection}.`);
-    setSection("");
+    setSection(fixedSection ?? "");
     setFileText(null);
     setOpen(false);
     router.refresh(); // reload the section tables below
@@ -75,8 +79,13 @@ export function AddRecordCard({
   if (!open) {
     return (
       <div className="flex flex-col gap-2">
-        <Button className="w-fit" onClick={() => setOpen(true)}>
-          Add record
+        <Button
+          className="w-fit"
+          variant={fixedSection ? "outline" : "default"}
+          size={fixedSection ? "sm" : "default"}
+          onClick={() => setOpen(true)}
+        >
+          {fixedSection ? "Replace all records" : "Add record"}
         </Button>
         {message && (
           <p className="text-sm" role="status">
@@ -90,29 +99,35 @@ export function AddRecordCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Add record</CardTitle>
+        <CardTitle>
+          {fixedSection ? `Replace all ${fixedSection} records` : "Add record"}
+        </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Type the section, then choose that section&apos;s CSV (in Google
-          Sheets: File → Download → Comma-separated values). If the section
-          already has records, they are replaced. Other sections are not
-          touched.
+          {fixedSection
+            ? `Choose the updated ${fixedSection} CSV`
+            : "Type the section, then choose that section's CSV"}{" "}
+          (in Google Sheets: File → Download → Comma-separated values). If the
+          section already has records, they are replaced. Other sections are
+          not touched.
         </p>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
+        {!fixedSection && (
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="section">Section</Label>
+            <Input
+              id="section"
+              value={section}
+              onChange={(e) => setSection(e.target.value)}
+              placeholder="e.g. BSIT2-9"
+              autoComplete="off"
+            />
+          </div>
+        )}
         <div className="flex flex-col gap-2">
-          <Label htmlFor="section">Section</Label>
+          <Label htmlFor={`csv-file-${fixedSection ?? "new"}`}>CSV file</Label>
           <Input
-            id="section"
-            value={section}
-            onChange={(e) => setSection(e.target.value)}
-            placeholder="e.g. BSIT2-9"
-            autoComplete="off"
-          />
-        </div>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="csv-file">CSV file</Label>
-          <Input
-            id="csv-file"
+            id={`csv-file-${fixedSection ?? "new"}`}
             type="file"
             accept=".csv,text/csv"
             onChange={handleFile}
@@ -162,14 +177,14 @@ export function AddRecordCard({
 
         <div className="flex flex-wrap gap-3">
           <Button onClick={handleSave} disabled={!canSave || saving}>
-            {saving ? "Saving…" : "Save section"}
+            {saving ? "Saving…" : fixedSection ? "Replace all records" : "Save section"}
           </Button>
           <Button
             variant="outline"
             onClick={() => {
               setOpen(false);
               setFileText(null);
-              setSection("");
+              setSection(fixedSection ?? "");
               setMessage("");
             }}
           >

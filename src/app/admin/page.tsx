@@ -116,12 +116,17 @@ export default async function AdminDashboard() {
           <h2 className="text-xl font-semibold tracking-tight">Sections</h2>
           <p className="rounded-[var(--radius)] border border-border bg-secondary px-4 py-3 text-sm">
             <strong>Need to change a record?</strong> Edit the CSV in Google
-            Sheets, then click <strong>Add record</strong>, type the same
-            section and upload it again. It replaces that section&apos;s
-            records.
+            Sheets, open the section below, click{" "}
+            <strong>Replace all records</strong> and upload the updated CSV.
+            It replaces that section&apos;s records only.
           </p>
           {sectionNames.map((name) => (
-            <SectionCard key={name} name={name} rows={sections.get(name)!} />
+            <SectionCard
+              key={name}
+              name={name}
+              rows={sections.get(name)!}
+              sectionCounts={sectionCounts}
+            />
           ))}
         </section>
       )}
@@ -129,7 +134,15 @@ export default async function AdminDashboard() {
   );
 }
 
-function SectionCard({ name, rows }: { name: string; rows: Row[] }) {
+function SectionCard({
+  name,
+  rows,
+  sectionCounts,
+}: {
+  name: string;
+  rows: Row[];
+  sectionCounts: Record<string, number>;
+}) {
   const lastUpload = rows.reduce(
     (latest, r) => (r.uploaded_at > latest ? r.uploaded_at : latest),
     rows[0].uploaded_at,
@@ -190,6 +203,7 @@ function SectionCard({ name, rows }: { name: string; rows: Row[] }) {
             </tbody>
           </table>
         </div>
+        <AddRecordCard sectionCounts={sectionCounts} fixedSection={name} />
         <div>
           <RemoveSectionButton section={name} count={rows.length} />
         </div>
