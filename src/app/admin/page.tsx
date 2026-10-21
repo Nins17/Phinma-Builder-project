@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { groupKey } from "@/lib/upload-csv";
 import { AddRecordCard } from "./add-record-card";
 import { LogoutButton } from "./logout-button";
 import { RemoveSectionButton } from "./remove-section-button";
@@ -9,6 +10,7 @@ type Row = {
   student_number: string;
   student_name: string;
   section: string;
+  subject: string;
   code: string;
   wrapup_quizzes: string;
   wrapup_min_score: string;
@@ -63,21 +65,23 @@ export default async function AdminDashboard() {
   const { data: records, error } = await supabase
     .from("student_records")
     .select(
-      "student_number, student_name, section, code, wrapup_quizzes, wrapup_min_score, checkin_tests, checkin_min_score, uploaded_at",
+      "student_number, student_name, section, subject, code, wrapup_quizzes, wrapup_min_score, checkin_tests, checkin_min_score, uploaded_at",
     )
     .order("student_name");
 
-  // Group the rows by section: { "BSIT2-9": [...], "BSIT2-10": [...] }
-  const sections = new Map<string, Row[]>();
+  // Group the rows by section + subject:
+  // { "BSIT1-6|ITE260": [...], "BSIT1-6|ITE366": [...] }
+  const groups = new Map<string, Row[]>();
   for (const r of records ?? []) {
-    sections.set(r.section, [...(sections.get(r.section) ?? []), r]);
+    const key = groupKey(r.section, r.subject);
+    groups.set(key, [...(groups.get(key) ?? []), r]);
   }
-  // "numeric" sorts BSIT2-9 before BSIT2-10.
-  const sectionNames = [...sections.keys()].sort((a, b) =>
+  // "numeric" sorts BSIT2-9 before BSIT2-10; "|" keeps the section first.
+  const groupKeys = [...groups.keys()].sort((a, b) =>
     a.localeCompare(b, undefined, { numeric: true }),
   );
-  const sectionCounts = Object.fromEntries(
-    sectionNames.map((s) => [s, sections.get(s)!.length]),
+  const groupCounts = Object.fromEntries(
+    groupKeys.map((k) => [k, groups.get(k)!.length]),
   );
 
   return (
@@ -97,7 +101,7 @@ export default async function AdminDashboard() {
         </div>
       </header>
 
-      <AddRecordCard sectionCounts={sectionCounts} />
+      <AddRecordCard groupCounts={groupCounts} />
 
       {error && (
         <p className="text-sm text-destructive">
@@ -105,27 +109,28 @@ export default async function AdminDashboard() {
         </p>
       )}
 
-      {!error && sectionNames.length === 0 && (
+      {!error && groupKeys.length === 0 && (
         <p className="text-sm text-muted-foreground">
           No sections yet. Click Add record to upload your first section.
         </p>
       )}
 
-      {sectionNames.length > 0 && (
+      {groupKeys.length > 0 && (
         <section className="flex flex-col gap-3">
-          <h2 className="text-xl font-semibold tracking-tight">Sections</h2>
+          <h2 className="text-xl font-semibold tracking-tight">
+            Sections and subjects
+          </h2>
           <p className="rounded-[var(--radius)] border border-border bg-secondary px-4 py-3 text-sm">
             <strong>Need to change a record?</strong> Edit the CSV in Google
-            Sheets, open the section below, click{" "}
+            Sheets, open the section and subject below, click{" "}
             <strong>Replace all records</strong> and upload the updated CSV.
-            It replaces that section&apos;s records only.
+            It replaces that section and subject&apos;s records only.
           </p>
-          {sectionNames.map((name) => (
+          {groupKeys.map((key) => (
             <SectionCard
-              key={name}
-              name={name}
-              rows={sections.get(name)!}
-              sectionCounts={sectionCounts}
+              key={key}
+              rows={groups.get(key)!}
+              groupCounts={groupCounts}
             />
           ))}
         </section>
@@ -134,15 +139,15 @@ export default async function AdminDashboard() {
   );
 }
 
+// One section + subject. All its rows share the same section and subject.
 function SectionCard({
-  name,
   rows,
-  sectionCounts,
+  groupCounts,
 }: {
-  name: string;
   rows: Row[];
-  sectionCounts: Record<string, number>;
+  groupCounts: Record<string, number>;
 }) {
+  const { section, subject } = rows[0];
   const lastUpload = rows.reduce(
     (latest, r) => (r.uploaded_at > latest ? r.uploaded_at : latest),
     rows[0].uploaded_at,
@@ -157,7 +162,9 @@ function SectionCard({
           <span className="text-muted-foreground transition-transform group-open:rotate-90">
             ▶
           </span>
-          <span className="text-lg font-semibold">{name}</span>
+          <span className="text-lg font-semibold">
+            {section} · {subject}
+          </span>
           <span className="text-sm text-muted-foreground">
             {rows.length} students
           </span>
@@ -203,9 +210,13 @@ function SectionCard({
             </tbody>
           </table>
         </div>
-        <AddRecordCard sectionCounts={sectionCounts} fixedSection={name} />
+        <AddRecordCard groupCounts={groupCounts} fixed={{ section, subject }} />
         <div>
-          <RemoveSectionButton section={name} count={rows.length} />
+          <RemoveSectionButton
+            section={section}
+            subject={subject}
+            count={rows.length}
+          />
         </div>
       </div>
     </details>

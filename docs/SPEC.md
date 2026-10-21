@@ -41,14 +41,21 @@ the student lookup.
 1. **Check my retakes (home, students):** Student Number and Code boxes
    and a Check button. The code is hidden as dots while typing, with a
    Show/Hide button. No student list and no names on this page.
-2. **My retakes (student result):** student name and section, Wrap-Up
+   If the student has records in more than one subject, they next see
+   "Which subject do you want to check?" with a button for each of their
+   own subjects (Ticket 09). With one subject, it opens straight away.
+2. **My retakes (student result):** student name, section and subject,
+   with Check another subject when they have several, plus Wrap-Up
    Quizzes to Retake with min. score, Check-ins to Retake with min.
    score, or "No retakes, you're all clear 🎉". Also shows "P2 status is
    not final." and a Check another button. A wrong number or code shows
    only "No match. Check your student number and code." It never says
    which one was wrong.
 3. **Admin login:** email and password. Only the admin's account works.
-4. **Admin dashboard:** (updated by Ticket 08)
+4. **Admin dashboard:** (updated by Tickets 08 and 09). Since Ticket 09
+   everything below works per **section + subject** (e.g. BSIT1-6 ·
+   ITE260): Add record asks for both, and each section + subject has
+   its own row, Replace all records and Remove buttons.
    - **Add record**: the teacher types the section and chooses that
      section's CSV. The preview says, for example, "55 students found for
      BSIT2-9, 0 problems. This will replace the 55 current BSIT2-9
@@ -67,15 +74,17 @@ the student lookup.
 
 ## Data
 
-**Table `student_records`** has one row per student. Columns come from
-the Upload tab and are stored as plain text, so values like `6 / 7` and
-`Aim high` work.
+**Table `student_records`** has one row per student per subject.
+Columns come from the Upload tab and are stored as plain text, so values
+like `6 / 7` and `Aim high` work.
 - `id`: unique row ID
-- `student_number`: unique. Matched exactly, ignoring spaces at the
-  start and end.
+- `student_number`: unique per subject (one record per student per
+  subject). Matched exactly, ignoring spaces at the start and end.
 - `student_name`
-- `section`: e.g. BSIT2-9
-- `code`: the secret code. Matched ignoring upper/lower case.
+- `section`: e.g. BSIT2-9, stored in capitals
+- `subject`: e.g. ITE260, stored in capitals (Ticket 09)
+- `code`: the secret code. One code per student, the same in every
+  subject (checked on upload). Matched ignoring upper/lower case.
 - `wrapup_quizzes`: e.g. "M1, M3". Blank means none.
 - `wrapup_min_score`: e.g. "6 / 7"
 - `checkin_tests`: e.g. "P1 check-in, P2 check-in". Blank means none.

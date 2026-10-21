@@ -83,6 +83,17 @@ export function normalizeSection(section: string) {
   return section.trim().toUpperCase();
 }
 
+// Subjects too, with all spaces removed: "ITe 366" -> "ITE366".
+// Must match the database's rule in 008-subjects.sql.
+export function normalizeSubject(subject: string) {
+  return subject.replace(/\s/g, "").toUpperCase();
+}
+
+// One key per section + subject, e.g. "BSIT1-6|ITE260", for counting.
+export function groupKey(section: string, subject: string) {
+  return `${normalizeSection(section)}|${normalizeSubject(subject)}`;
+}
+
 export function readUpload(
   text: string,
   section: string,

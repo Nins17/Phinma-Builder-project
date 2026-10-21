@@ -8,8 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 
-// What the lookup function returns. It never includes the code.
+// What the lookup function returns, one per subject. It never includes
+// the code.
 type Retakes = {
+  subject: string;
   student_name: string;
   section: string;
   wrapup_quizzes: string;
@@ -32,6 +34,8 @@ export function RetakeChecker() {
   const [showCode, setShowCode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  // All of this student's subjects, and the one they chose to view.
+  const [subjects, setSubjects] = useState<Retakes[] | null>(null);
   const [result, setResult] = useState<Retakes | null>(null);
 
   async function handleCheck(event: React.FormEvent<HTMLFormElement>) {
@@ -40,7 +44,8 @@ export function RetakeChecker() {
     setMessage("");
 
     // Students can't read the table. They can only ask the lookup
-    // function, which returns one row if the number AND code match.
+    // function, which returns one row per subject if the number AND code
+    // match.
     const supabase = createClient();
     const { data, error } = await supabase.rpc("lookup_student_record", {
       p_student_number: studentNumber.trim(),
@@ -55,11 +60,14 @@ export function RetakeChecker() {
       // can use this form to find out which student numbers exist.
       setMessage("No match. Check your student number and code.");
     } else {
-      setResult(data[0]);
+      setSubjects(data);
+      // Only one subject: no need to choose.
+      setResult(data.length === 1 ? data[0] : null);
     }
   }
 
   function checkAnother() {
+    setSubjects(null);
     setResult(null);
     setStudentNumber("");
     setCode("");
@@ -75,7 +83,9 @@ export function RetakeChecker() {
       <Card>
         <CardHeader>
           <CardTitle>{result.student_name}</CardTitle>
-          <p className="text-sm text-muted-foreground">{result.section}</p>
+          <p className="text-sm text-muted-foreground">
+            {result.section} · <strong>{result.subject}</strong>
+          </p>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           {allClear ? (
@@ -99,6 +109,38 @@ export function RetakeChecker() {
           <p className="text-sm text-muted-foreground">
             P2 status is not final.
           </p>
+          <div className="flex flex-wrap gap-3">
+            {subjects && subjects.length > 1 && (
+              <Button variant="outline" onClick={() => setResult(null)}>
+                Check another subject
+              </Button>
+            )}
+            <Button variant="outline" onClick={checkAnother}>
+              Check another
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Several subjects: let the student choose. Only their own subjects
+  // are listed, because they came back from their own lookup.
+  if (subjects) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>{subjects[0].student_name}</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Which subject do you want to check?
+          </p>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">
+          {subjects.map((s) => (
+            <Button key={s.subject} size="lg" onClick={() => setResult(s)}>
+              {s.subject}
+            </Button>
+          ))}
           <Button variant="outline" onClick={checkAnother}>
             Check another
           </Button>
