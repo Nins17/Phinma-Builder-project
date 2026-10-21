@@ -6,7 +6,7 @@ score for each.
 
 **Blocked by:** 02
 
-**Status:** todo
+**Status:** done
 
 - [x] The starter page is replaced by the Check my retakes screen:
       Student Number and Code boxes and a Check button
@@ -20,5 +20,5 @@ score for each.
       number and code." It doesn't say which one was wrong.
 - [x] Spaces around the student number are ignored, and the code works
       in upper or lower case
-- [ ] Looks right on a phone
-- [ ] Works on the live URL
+- [x] Looks right on a phone
+- [x] Works on the live URL
