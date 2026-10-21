@@ -82,7 +82,7 @@ function clean(value: string | undefined) {
 // "bsit 1-6" = "BSIT1-6" and "ITe 366" = "ITE366". These are exactly
 // the characters the database's clean_label() removes (009 SQL),
 // including the non-breaking space Google Sheets sometimes pastes.
-const SPACES = /[ \t\n\r\f\v ]/g;
+const SPACES = /[ \t\n\r\f\v\u00a0]/g;
 
 function cleanLabel(value: string) {
   return value.replace(SPACES, "").toUpperCase();

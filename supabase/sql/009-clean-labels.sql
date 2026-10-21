@@ -10,7 +10,7 @@
 -- 1. The rule, written once ----------------------------------------
 --
 -- Removes ordinary spaces, tabs, line breaks and the "non-breaking
--- space" Google Sheets sometimes pastes ( ), then uses capitals.
+-- space" Google Sheets sometimes pastes (\u00a0), then uses capitals.
 -- The website uses the same characters: cleanLabel() in upload-csv.ts.
 
 create or replace function public.clean_label(p_value text)
@@ -19,7 +19,7 @@ language sql
 immutable
 set search_path = ''
 as $$
-  select upper(regexp_replace(p_value, '[ \t\n\r\f\v ]', '', 'g'));
+  select upper(regexp_replace(p_value, '[ \t\n\r\f\v\u00a0]', '', 'g'));
 $$;
 
 revoke all on function public.clean_label(text) from public, anon;
