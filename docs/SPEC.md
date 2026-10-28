@@ -50,7 +50,8 @@ the student lookup.
 2. **My retakes (student result):** student name, section and subject,
    with Check another subject when they have several, plus Wrap-Up
    Quizzes to Retake with min. score, Check-ins to Retake with min.
-   score, or "No retakes, you're all clear 🎉". Also shows "P2 status is
+   score, or "No retakes, you're all clear 🎉". Then the teacher's
+   Remarks for that subject, if any (Ticket 10). Also shows "P2 status is
    not final." and a Check another button. A wrong number or code shows
    only "No match. Check your student number and code." It never says
    which one was wrong.
@@ -95,6 +96,8 @@ like `6 / 7` and `Aim high` work.
 - `wrapup_min_score`: e.g. "6 / 7"
 - `checkin_tests`: e.g. "P1 check-in, P2 check-in". Blank means none.
 - `checkin_min_score`: e.g. "87 / 100" or "Aim high"
+- `remarks`: the teacher's note to the student, shown to them (Ticket
+  10). Optional in the CSV; blank means none.
 - `uploaded_at`: when this row was uploaded
 
 Who may read and write (Row Level Security ON):
@@ -103,7 +106,7 @@ Who may read and write (Row Level Security ON):
 - Students look up a record only through one database **lookup
   function**. It takes a student number and a code and returns only that
   student's records: one row per subject, with the subject, section,
-  name, retakes and min. scores. It never returns the code or anyone
+  name, retakes, min. scores and remarks. It never returns the code or anyone
   else's rows. A wrong number or code returns nothing.
 - Replacing a section + subject happens as a single all-or-nothing step:
   either the whole new file goes in, or nothing changes. Other sections
@@ -147,6 +150,7 @@ On the LIVE Vercel URL:
 - P1 / P3 data or a history of past periods
 - Sending codes by email from the app
 - Printing code slips from the app
-- Showing grades, mastery grades or remarks to students
+- Showing grades or mastery grades to students (remarks ARE shown since
+  Ticket 10)
 - Locking a student number after repeated wrong codes
 - Search on the admin records table

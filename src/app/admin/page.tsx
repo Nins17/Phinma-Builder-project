@@ -16,6 +16,7 @@ type Row = {
   wrapup_min_score: string;
   checkin_tests: string;
   checkin_min_score: string;
+  remarks: string;
   uploaded_at: string;
 };
 
@@ -29,6 +30,7 @@ const TABLE_COLUMNS: { heading: string; key: keyof Row }[] = [
   { heading: "Min.", key: "wrapup_min_score" },
   { heading: "Check-ins", key: "checkin_tests" },
   { heading: "Min.", key: "checkin_min_score" },
+  { heading: "Remarks", key: "remarks" },
 ];
 
 export default async function AdminDashboard() {
@@ -65,7 +67,7 @@ export default async function AdminDashboard() {
   const { data: records, error } = await supabase
     .from("student_records")
     .select(
-      "student_number, student_name, section, subject, code, wrapup_quizzes, wrapup_min_score, checkin_tests, checkin_min_score, uploaded_at",
+      "student_number, student_name, section, subject, code, wrapup_quizzes, wrapup_min_score, checkin_tests, checkin_min_score, remarks, uploaded_at",
     )
     .order("student_name");
 
@@ -199,7 +201,9 @@ function SectionCard({
                       className={
                         c.key === "code"
                           ? "px-2 py-2 font-mono"
-                          : "whitespace-nowrap px-2 py-2"
+                          : c.key === "remarks"
+                            ? "min-w-64 px-2 py-2" // long text wraps
+                            : "whitespace-nowrap px-2 py-2"
                       }
                     >
                       {r[c.key] || "—"}

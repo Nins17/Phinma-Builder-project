@@ -13,7 +13,7 @@ stays small enough to actually ship by Session 3.
 - More than one admin account (e.g. co-teachers)
 - P1 / P3 data, or a history of past grading periods
 - Sending codes to students by email from the app
-- Showing grades, mastery grades or remarks to students
+- Showing grades or mastery grades to students (remarks were built in Ticket 10)
 
 ## From /to-spec
 

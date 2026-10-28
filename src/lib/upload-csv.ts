@@ -9,6 +9,7 @@ export type StudentRecord = {
   wrapup_min_score: string;
   checkin_tests: string;
   checkin_min_score: string;
+  remarks: string;
 };
 
 // Upload tab heading -> database column. These are also the headings in
@@ -21,9 +22,14 @@ const COLUMNS: Record<string, keyof StudentRecord> = {
   "Min. Score per Quiz": "wrapup_min_score",
   "Check-in to Retake": "checkin_tests",
   "Min. Check-in Score": "checkin_min_score",
+  Remarks: "remarks",
 };
 
 export const TEMPLATE_HEADINGS = Object.keys(COLUMNS);
+
+// Columns a file may leave out (older CSVs made before Remarks existed).
+// A missing optional column is saved as blank.
+const OPTIONAL = new Set<keyof StudentRecord>(["remarks"]);
 
 const REQUIRED: (keyof StudentRecord)[] = [
   "student_number",
@@ -116,7 +122,7 @@ export function readUpload(
     if (i !== -1) index[key] = i;
   }
   const missing = Object.entries(COLUMNS)
-    .filter(([, key]) => index[key] === undefined)
+    .filter(([, key]) => index[key] === undefined && !OPTIONAL.has(key))
     .map(([heading]) => heading);
   if (missing.length > 0) {
     return {
@@ -144,7 +150,8 @@ export function readUpload(
 
     const record = {} as StudentRecord;
     for (const key of Object.values(COLUMNS)) {
-      record[key] = clean(cells[index[key]!]);
+      const i = index[key];
+      record[key] = i === undefined ? "" : clean(cells[i]); // optional column left out
     }
 
     for (const key of REQUIRED) {

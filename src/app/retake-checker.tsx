@@ -18,6 +18,7 @@ type Retakes = {
   wrapup_min_score: string;
   checkin_tests: string;
   checkin_min_score: string;
+  remarks: string;
 };
 
 // "M1, M3" -> ["M1", "M3"]. A blank cell means nothing to retake.
@@ -105,6 +106,13 @@ export function RetakeChecker() {
                 minScore={result.checkin_min_score}
               />
             </>
+          )}
+          {result.remarks && (
+            <div className="rounded-[var(--radius)] border border-border bg-secondary px-4 py-3">
+              <h2 className="text-sm font-medium">Remarks</h2>
+              {/* Plain text: React shows it exactly as typed, never as HTML. */}
+              <p className="whitespace-pre-line text-sm">{result.remarks}</p>
+            </div>
           )}
           <p className="text-sm text-muted-foreground">
             P2 status is not final.
